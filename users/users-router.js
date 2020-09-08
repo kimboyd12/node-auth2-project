@@ -2,11 +2,12 @@ const express = require("express")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const Users = require("./users-model")
+const restrict = require("../middleware/restrict")
 
 const router = express.Router()
 
 // get users
-router.get("/api/users", async (req, res, next) => {
+router.get("/api/users", restrict("admin"), async (req, res, next) => {
     try {
         res.json(await Users.find())
     } catch(err) {
@@ -61,12 +62,13 @@ router.post("/api/register", async (req, res, next) => {
 
         const token = jwt.sign({
             userID: user.id,
+            userRole: "admin"
         }, process.env.JWT_SECRET)
 
-        res.cookie("token", token)
 
         res.json({
-            message: `Welcome ${user.username}!!!`
+            message: `Welcome ${user.username}!!!`,
+            token
         })
 
      } catch(err) {
